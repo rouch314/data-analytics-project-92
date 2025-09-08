@@ -62,3 +62,27 @@ from day_num
 order by weekday_num, seller;
 
 ~Отчет с данными по выручке по каждому продавцу и дню недели~
+
+WITH first_purchase AS (
+    SELECT
+    s.customer_id,
+    s.sale_date,
+    p.price,
+    CONCAT(c.first_name, ' ', c.last_name) AS customer,
+    CONCAT(e.first_name, ' ', e.last_name) AS seller,
+    ROW_NUMBER() over (partition by s.customer_id order by s.sale_date) as rn
+    from sales s 
+    join customers c
+    on s.customer_id = c.customer_id
+    JOIN employees e ON s.sales_person_id = e.employee_id
+    JOIN products p ON s.product_id = p.product_id
+    )
+select
+customer, 
+sale_date,
+seller
+from first_purchase
+where rn = 1 and price = 0
+order by customer;
+
+~Отчет с покупателями, первая покупка которых пришлась на время проведения специальных акций~       
