@@ -125,8 +125,8 @@ with sales2 as (
 
 select *
 from sales2
-where average_income < (select avg(average_income) from sales2)
-order by average_income;
+where sales2.average_income < (select avg(sales2.average_income) from sales2)
+--order by average_income;
 
 -- 3 отчет day_of_the_week_income
 with sales3 as (
@@ -186,16 +186,16 @@ order by 1; -- сортируем по дате
 -- 3 отчет special_offer
 with sp_of as (
     select
-        	c.customer_id,
+        c.customer_id,
         --берем id покупателя для последующей фильтрации
-       		s.sale_date, --дата покупки
-       		p.price, --берем цену, будем использовать для фильтрации
-        	concat(c.first_name || ' ' || c.last_name) as customer,
+       	s.sale_date, --дата покупки
+       	p.price, --берем цену, будем использовать для фильтрации
+        concat(c.first_name || ' ' || c.last_name) as customer,
         --склеиваем имя и фамилию клиентов
-        	concat(e.first_name || ' ' || e.last_name) as seller,
+        concat(e.first_name || ' ' || e.last_name) as seller,
         --склеиваем имя и фамилию продавцов
-        	row_number() over (partition by c.customer_id order by s.sale_date)
-    as rn
+        row_number() over (partition by c.customer_id order by s.sale_date)
+            as rn
         --нумеруем покупки покупателей по дате
     from sales as s
     left join customers as c --джойним эту таблицу для имен клиентов
@@ -215,3 +215,4 @@ select
     sp_of.seller
 from sp_of
 where sp_of.rn = 1 and sp_of.price = 0;
+
