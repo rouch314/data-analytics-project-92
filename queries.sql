@@ -86,7 +86,7 @@ order by customer;
 
 
 --Отчет с покупателями, первая покупка которых пришлась
-на время проведения специальных акций~    
+на время проведения специальных акций~
 */
 --4 ШАГ
 select count(customer_id) --считаем кол-во покупателей по уникальным id
@@ -113,24 +113,20 @@ limit 10; --показываем только первые 10
 -- 2 отчет lowest_average_income
 with sales2 as (
     select
-        --склеиваем имя и фамилию продавцов
         concat(e.first_name, ' ', e.last_name) as seller,
-        --считаем среднюю выручку за сделку каждого продавца
         floor(avg(p.price * s.quantity)) as average_income
     from sales as s
     left join employees as e
-        --из этой таблицы берем имена и фамилии продавцов
         on s.sales_person_id = e.employee_id
     left join products as p
-        on s.product_id = p.product_id --из этой цены на товары
-    group by 1 --группировка по продавцам
+        on s.product_id = p.product_id
+    group by 1
 )
 
 select *
 from sales2
---сортируем по ср. выручке за сделку меньше чем ср. выручка по всем продавцам
-where floor(avg(p.price * s.quantity)) < (select avg(average_income) from sales2)
-order by 2; --сортируем по ср. выручке по возрастанию
+where average_income < (select avg(average_income) from sales2)
+order by average_income;
 
 -- 3 отчет day_of_the_week_income
 with sales3 as (
@@ -190,15 +186,15 @@ order by 1; -- сортируем по дате
 -- 3 отчет special_offer
 with sp_of as (
     select
-        c.customer_id,
+        	c.customer_id,
         --берем id покупателя для последующей фильтрации
-        s.sale_date, --дата покупки
-        p.price, --берем цену, будем использовать для фильтрации
-        concat(c.first_name || ' ' || c.last_name) as customer,
+       		s.sale_date, --дата покупки
+       		p.price, --берем цену, будем использовать для фильтрации
+        	concat(c.first_name || ' ' || c.last_name) as customer,
         --склеиваем имя и фамилию клиентов
-        concat(e.first_name || ' ' || e.last_name) as seller,
+        	concat(e.first_name || ' ' || e.last_name) as seller,
         --склеиваем имя и фамилию продавцов
-        		row_number() over (partition by c.customer_id order by s.sale_date)
+        	row_number() over (partition by c.customer_id order by s.sale_date)
     as rn
         --нумеруем покупки покупателей по дате
     from sales as s
@@ -219,4 +215,3 @@ select
     sp_of.seller
 from sp_of
 where sp_of.rn = 1 and sp_of.price = 0;
-
