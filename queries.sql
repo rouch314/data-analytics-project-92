@@ -8,7 +8,7 @@ select
 COUNT(s.sales_person_id) as operations,
 SUM(s.quantity * p.price) as income
 from sales s
-join employees e 
+join employees e
 on s.sales_person_id  = e.employee_id
 join products p
 on s.product_id = p.product_id
@@ -22,12 +22,12 @@ select
 (e.first_name || ' ' || e.last_name) as seller,
 FLOOR(AVG(s.quantity * p.price)) as average_income
 from sales s
-join employees e 
+join employees e
 on s.sales_person_id  = e.employee_id
 join products p
 on s.product_id = p.product_id
 group by (e.first_name || ' ' || e.last_name)
-having 
+having
 AVG(s.quantity * p.price) < (
 	select
 	AVG(s2.quantity * p2.price) as average_sum
@@ -46,12 +46,12 @@ to_char(s.sale_date, 'FMDay') as day_of_week,
 FLOOR(SUM(s.quantity * p.price)) as income,
 ((EXTRACT(DOW FROM s.sale_date)::int + 6) % 7) as weekday_num
 from sales s
-join employees e 
+join employees e
 on s.sales_person_id  = e.employee_id
 join products p
 on s.product_id = p.product_id
-group by 
-(e.first_name || ' ' || e.last_name), 
+group by
+(e.first_name || ' ' || e.last_name),
 to_char(s.sale_date, 'FMDay'),
 ((EXTRACT(DOW FROM s.sale_date)::int + 6) % 7)
 )
@@ -70,14 +70,14 @@ WITH first_purchase AS (
     CONCAT(c.first_name, ' ', c.last_name) AS customer,
     CONCAT(e.first_name, ' ', e.last_name) AS seller,
     ROW_NUMBER() over (partition by s.customer_id order by s.sale_date) as rn
-    from sales s 
+    from sales s
     join customers c
     on s.customer_id = c.customer_id
     JOIN employees e ON s.sales_person_id = e.employee_id
     JOIN products p ON s.product_id = p.product_id
     )
 select
-customer, 
+customer,
 sale_date,
 seller
 from first_purchase
@@ -85,7 +85,8 @@ where rn = 1 and price = 0
 order by customer;
 
 
---Отчет с покупателями, первая покупка которых пришлась на время проведения специальных акций~      
+--Отчет с покупателями, первая покупка которых пришлась
+на время проведения специальных акций~    
 */
 --4 ШАГ
 select count(customer_id) --считаем кол-во покупателей по уникальным id
@@ -128,7 +129,7 @@ with sales2 as (
 select *
 from sales2
 --сортируем по ср. выручке за сделку меньше чем ср. выручка по всем продавцам
-where average_income < (select avg(average_income) from sales2)
+where floor(avg(p.price * s.quantity)) < (select avg(average_income) from sales2)
 order by 2; --сортируем по ср. выручке по возрастанию
 
 -- 3 отчет day_of_the_week_income
@@ -197,8 +198,8 @@ with sp_of as (
         --склеиваем имя и фамилию клиентов
         concat(e.first_name || ' ' || e.last_name) as seller,
         --склеиваем имя и фамилию продавцов
-        row_number() over (partition by c.customer_id order by s.sale_date)
-        as rn
+        		row_number() over (partition by c.customer_id order by s.sale_date)
+    as rn
         --нумеруем покупки покупателей по дате
     from sales as s
     left join customers as c --джойним эту таблицу для имен клиентов
@@ -218,3 +219,4 @@ select
     sp_of.seller
 from sp_of
 where sp_of.rn = 1 and sp_of.price = 0;
+
