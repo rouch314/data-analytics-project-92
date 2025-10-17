@@ -112,44 +112,44 @@ limit 10; --показываем только первые 10
 
 -- 2 отчет lowest_average_income
 with cte_lowest_income as (
-    select
-        concat(e.first_name, ' ', e.last_name) as seller,
-        floor(avg(p.price * s.quantity)) as average_income
-    from sales as s
-    left join employees as e
-        on s.sales_person_id = e.employee_id
-    left join products as p
-        on s.product_id = p.product_id
-    group by 1
+        select
+            concat(e.first_name, ' ', e.last_name) as seller,
+            floor(avg(p.price * s.quantity)) as average_income
+        from sales s
+        left join employees e
+            on s.sales_person_id = e.employee_id
+        left join products p
+            on s.product_id = p.product_id
+        group by 1
 )
 
 select *
-from cte_lowest_income li
-where li.average_income < (
-    select avg(li2.average_income)
-    from cte_lowest_income li2
+from cte_lowest_income
+where average_income < (
+        select avg(li2.average_income)
+        from cte_lowest_income li2
 );
 
 -- 3 отчет day_of_the_week_income
 with sales3 as (
-    select
-        concat(e.first_name || ' ' || e.last_name) as seller,
-        to_char(s.sale_date, 'day') as day_of_week,
-        floor(sum(p.price * s.quantity)) as income,
-        extract(dow from s.sale_date) + 1 as num_week
-    from sales as s
-    left join employees as e
-        on s.sales_person_id = e.employee_id
-    left join products as p
-        on s.product_id = p.product_id
-    group by 1, 2, 4
-    order by 4, 1
+        select
+            concat(e.first_name || ' ' || e.last_name) as seller,
+            to_char(s.sale_date, 'day') as day_of_week,
+            floor(sum(p.price * s.quantity)) as income,
+            extract(dow from s.sale_date) + 1 as num_week
+        from sales s
+        left join employees e
+            on s.sales_person_id = e.employee_id
+        left join products p
+            on s.product_id = p.product_id
+        group by 1, 2, 4
+        order by 4, 1
 )
 
 select
-    seller,
-    day_of_week,
-    income
+        seller,
+        day_of_week,
+        income
 from sales3;
 
 -- 6 ШАГ
@@ -211,6 +211,7 @@ select
     sp_of.seller
 from sp_of
 where sp_of.rn = 1 and sp_of.price = 0;
+
 
 
 
