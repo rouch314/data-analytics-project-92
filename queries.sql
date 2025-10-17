@@ -2,7 +2,7 @@ select
 COUNT(c.customer_id) as customers_count
 from customers c;
 
-~Подсчет количества покупателей~
+--Подсчет количества покупателей
 
 select
 (e.first_name || ' ' || e.last_name) as seller,
@@ -17,7 +17,7 @@ group by (e.first_name || ' ' || e.last_name)
 order by income desc
 limit 10;
 
-~Определение ТОП-10 продавцов по выручке~
+--Определение ТОП-10 продавцов по выручке
 
 select
 (e.first_name || ' ' || e.last_name) as seller,
@@ -38,7 +38,7 @@ AVG(s.quantity * p.price) < (
 )
 order by average_income;
 
-~Отчет с продавцами, чья выручка ниже средней выручки всех продавцов~
+--Отчет с продавцами, чья выручка ниже средней выручки всех продавцов
 
 with day_num as (
 select
@@ -61,7 +61,7 @@ seller, day_of_week, income
 from day_num
 order by weekday_num, seller;
 
-~Отчет с данными по выручке по каждому продавцу и дню недели~
+--Отчет с данными по выручке по каждому продавцу и дню недели
 
 WITH first_purchase AS (
     SELECT
@@ -85,4 +85,5 @@ from first_purchase
 where rn = 1 and price = 0
 order by customer;
 
-~Отчет с покупателями, первая покупка которых пришлась на время проведения специальных акций~       
+
+--Отчет с покупателями, первая покупка которых пришлась на время проведения специальных акций~      
