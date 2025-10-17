@@ -183,13 +183,10 @@ order by 1; -- сортируем по дате
 with sp_of as (
     select
         c.customer_id,
-        --берем id покупателя для последующей фильтрации
-       	s.sale_date, --дата покупки
-       	p.price, --берем цену, будем использовать для фильтрации
+       	s.sale_date,
+       	p.price,
         concat(c.first_name || ' ' || c.last_name) as customer,
-        --склеиваем имя и фамилию клиентов
         concat(e.first_name || ' ' || e.last_name) as seller,
-        --склеиваем имя и фамилию продавцов
         row_number() over (partition by c.customer_id order by s.sale_date)
             as rn
         --нумеруем покупки покупателей по дате
@@ -211,4 +208,5 @@ select
     sp_of.seller
 from sp_of
 where sp_of.rn = 1 and sp_of.price = 0;
+
 
