@@ -111,7 +111,7 @@ order by 3 desc --сортируем по выручке по убыванию
 limit 10; --показываем только первые 10
 
 -- 2 отчет lowest_average_income
-with sales2 as (
+with lowest_income as (
     select
         concat(e.first_name, ' ', e.last_name) as seller,
         floor(avg(p.price * s.quantity)) as average_income
@@ -122,38 +122,30 @@ with sales2 as (
         on s.product_id = p.product_id
     group by 1
 )
-
 select *
-from sales2
-where sales2.average_income < (select avg(sales2.average_income) from sales2)
+from lowest_income
+where average_income < (select avg(average_income) from lowest_income);
 --order by average_income;
 
 -- 3 отчет day_of_the_week_income
 with sales3 as (
     select
-        --склеиваем имя и фамилию продавцов
         concat(e.first_name || ' ' || e.last_name) as seller,
-        --из даты берем название дня недели
         to_char(s.sale_date, 'day') as day_of_week,
-        floor(sum(p.price * s.quantity)) as income, --считаем выручку
+        floor(sum(p.price * s.quantity)) as income,
         extract(dow from s.sale_date) + 1 as num_week
-    --из даты берем порядковый номер дня недели для сортировки и прибавляем
-    --единицу, для того чтобы неделя начиналась с понедельника
     from sales as s
     left join employees as e
-        --джойним эту таблицу для имен продавцов
         on s.sales_person_id = e.employee_id
     left join products as p
-        on s.product_id = p.product_id  --а из этой берем цены товаров
+        on s.product_id = p.product_id
     group by 1, 2, 4
-    order by 4, 1 --сортируем по порядковому номеру дня недели и продавцу
+    order by 4, 1
 )
-
 select
     seller,
     day_of_week,
-    income --используем CTE для того, чтобы отсортировать таблицу
-    --по порядковому номеру дня недели, но не отображать этот столбец
+    income
 from sales3;
 
 -- 6 ШАГ
@@ -215,4 +207,5 @@ select
     sp_of.seller
 from sp_of
 where sp_of.rn = 1 and sp_of.price = 0;
+
 
